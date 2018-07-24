@@ -1,24 +1,12 @@
 # GNU Makefile (>= 4.0) for building OCaml applications
-# (c) 2012-2017 Christian Rinderknecht
+# (c) 2012-2018 Christian Rinderknecht
 # rinderknecht@free.fr
-#
-# You may freely modify and redistribute, as long as I am credited as
-# the original author and the same terms apply to the recipients.
-# Please report any error you may find. Consult Makefile.man and
-# Makefile.md, which must be distributed along with this makefile.
 
 # ====================================================================
 # TO DO
 
 # Add a catch-all rule
-
 # Inform about useless modules (neither compiled nor linked)
-
-# Bug: (1) Run make;
-#      (2) introduce an error in ModelicaParser_all.mly like '{'
-#          instead of '%{';
-#      (3) run make again ([unlexer] is not built);
-#      (4) make again, and [unlexer] is built!
 
 # ====================================================================
 # General Settings (GNU Make 4.1 recommended)
