@@ -1,0 +1,346 @@
+%%-*-text-*-
+
+Manual of the GNU Makefile for OCaml applications
+
+Copyright 2012-2016 Christian Rinderknecht
+rinderknecht@free.fr
+
+
+REQUIREMENTS
+
+    GNU Make 4.0 or higher
+    GNU Sed 4.0 or higher
+    GNU coreutils
+    Linux or Darwin (OS X)
+    Dash or Bash
+    The OCaml system (from INRIA)
+
+
+RECOMMENDED OCAML TOOLS
+
+    FindLib (a.k.a. ocamlfind, library manager)
+    Menhir  (parser generator)
+    OPAM    (package manager)
+
+
+PURPOSE
+
+The accompanying makefile completely automates the build of small
+OCaml projects with minimum user input by calling a minimum number of
+times the compilers and related tools. Great care has been brought to
+ensure clear and non-redundant error reporting. Optionally, this
+makefile may also determine a default linking order for the object
+files. Some classic tools, like [ocamlfind], [ocamllex], [menhir] and
+[camlp4], are recognised and automatically leveraged. Command line
+options specific to a given tool and a given file can be specified in
+tag files (metadata).
+
+The makefile has been designed primarily as a development tool, not a
+diagnostic tool, so the build process is detailed in a concise and
+precise manner, without redundancy, and a great amount of efforts has
+been devoted to clear warning and error reporting, in particular the
+first error in a causal chain is detailed and the subsequent others
+are skipped while the compilation goes as far as possible, within
+reasonable limits, e.g., if an interface fails to compile, its
+corresponding implementation is ignored entirely. Uncorrected faults,
+warnings and ignored source files are reported again, so the
+programmer is reminded of fixing them.
+
+GNU Make 4.0 or higher enables parallel builds whilst maintaining the
+readability of reporting.
+
+Several executables can be built in the same source directory, but,
+currently, all source files must reside in the same directory.
+
+
+CONVENTION
+
+We write between square brackets excerpts of the Makefile, including
+shell scripts, for instance, we write "the variable [OBJ]", the file
+[<main>.mll], the compiler [ocamlc] etc. A name between angle brackets
+is a metavariable, like [<main>] denoting any basename for the main
+module (that is, the one whose object code is linked last).
+
+
+CONFIGURATION
+
+The first action to undertake is to check the availability of the
+utilities required to build your application. This is simply achieved
+by running [make config]. Note that installing [ocamlfind] is highly
+recommended, so third-party libraries can be automatically handled by
+the makefile.
+
+The minimal OCaml application is made up of exactly one implementation
+(.ml, .mll or .mly), say [foo.ml]. In the most general case, several
+applications can be built from the same source directory.
+
+Each OCaml application can be built in two flavours: bytecode or
+native code. The name of the executable will always be the name of the
+main implementation, here [foo], followed by an extension [.byte]
+(bytecode) or [.opt] (native code), hence either [foo.byte] or
+[foo.opt].
+
+If there is more than one implementation (.ml) to compile, the
+executables (perhaps there is only one) must have an accompanying tag
+file, possibly empty, which is a hidden file giving options to the
+linker. For instance, if the executable is [foo.byte] or [foo.opt],
+then the associated tag file is named [.foo.tag]. This enables the
+build of several applications from the same source directory: the
+makefile simply determines those applications by identifying those tag
+files.
+
+The parser specifications (e.g., [foo.mly]) from which Menhir is
+expected to produce a parser require a tag file ([.foo.mly.tag]),
+except if there is only one. Specifications not meant to produce a
+parser must not have a tag file (for instance, they may be included by
+Menhir in another specification).
+
+Optional variables can be set in a file Makefile.cfg, amongst the
+following.
+
+OCAMLC
+  The bytecode compiler. If [ocamlfind] is installed, the default
+  value is overriden to "ocamlc", as [ocamlfind] actually takes care
+  of calling [ocamlc.opt] instead when available; otherwise the
+  default value is "ocamlc.opt" if found, else "ocamlc". The setting
+  can be checked by [make env]. Optionally, you may set OCAMLC in
+  Makefile.cfg.
+
+OCAMLOPT
+  Same as OCAMLC, except with "ocamlopt" in stead of "ocamlc".
+
+OCAMLDEP
+  Same as OCAMLC, except with "ocamldep" in stead of "ocamlc".
+
+OCAMLLEX
+  The standard lexer generator. If [ocamllex.opt] is installed, the
+  default value is "ocamllex.opt", else "ocamllex". The setting
+  can be checked by [make env]. Optionally, you may set OCAMLLEX in
+  Makefile.cfg.
+
+VERB
+  If you want a more verbose output, just set it to "yes".
+
+DEBUG
+  You may set this variable to "yes" if you want to debug the
+  makefile. Note that this implies that VERB is set to "yes" as well.
+
+SHELL
+  You may set this variable to the command shell you use. Our scripts
+  have been tested with [dash] and [bash]. We recommend setting it to
+  "dash", if available, for faster builds.
+
+BFLAGS
+  Additional flags to the invocation [ocamlc -c] or [ocamlc.opt -c],
+  applying to all OCaml compilation units. (None by default.) Flags
+  specific to a unit [<mod>.mli] or [<mod>.ml] must be set in the
+  corresponding tag file [.<mod>.mli.tag] or [.<mod>.ml.tag]. See TAGS
+  below.
+
+CFLAGS
+  Additional flags to the invocation [ocamlc -c] or [ocamlc.opt -c] on
+  C files. (None by default.)
+
+OFLAGS
+  Additional flags to the call [ocamlopt -c] or [ocamlopt.opt -c],
+  applying to all OCaml compilation units. By default, it equals
+  ${BFLAGS}, otherwise, file-specific options should be defined in the
+  tag file (see BFLAGS).
+
+DFLAGS
+  Additional flags to the call [ocamldep -modules -one-line] or
+  [ocamldep.opt -modules -one-line], applying to all compilation
+  units. (None by default.) File-specific options should be defined in
+  the tag file (see BFLAGS).
+
+LFLAGS
+  Flags to the call [ocamllex] or [ocamllex.opt], applying to all
+  lexer specifications. (None by default.) File-specific options
+  should be defined in the tag file [.<mod>.mll.tag], without any tool
+  prefix. See TAGS below.
+
+YFLAGS
+  Additional flags to the invocation [menhir -v], applying to all
+  files. (None by default.) File-specific options are in the tag file
+  [.<mod>.mly.tag], without "menhir: " prefix.
+
+
+BUILD DIRECTORY
+
+The object codes, the executables and metadata are generated in a
+subdirectory of the source directory. The name of that directory can
+be set in Makefile.cfg (variable OBJDIR), or automatically determined
+by the Makefile, in which case it consists of an underscore followed
+by the result of the [arch] shell command, e.g., "_i686" or "_x86_64"
+-- this naming convention enables multi-architecture builds. For
+instance, if the programmer wants the build directory to be "_build",
+they should set it in Makefile.cfg as follows:
+
+OBJDIR := _build
+
+
+TARGETS
+
+To avoid unexpected feature interactions and breaking some GNU Make
+assumptions, always use _only one_ of the following targets at each
+invocation of GNU Make.
+
+ config
+   To check the installed OCaml system.
+
+ env
+   To check the value of some variables denoting OCaml tools.
+
+ all
+ byte
+   The default target. To update all bytecode executables. Note that
+   the executables are not standalone and require the virtual machine
+   [ocamlrun].
+
+ nat
+   To update all native-code executables, whilst maximising
+   independent compilations and minimising opportunities for
+   cross-module optimisations, like inlining. For reversed
+   constraints, see "opt" next.
+
+ opt
+   To update all native-code executables, whilst minimising
+   independent compilations and maximising opportunities for
+   cross-module optimisations like inlining. (For reversed
+   constraints, see "nat" above and TAGS.) To benefit fully of this
+   build, typically for a release, you should make a clean slate with
+   [make clean] and then [make opt]. Note that if you update a
+   specific object, e.g., [make parser.cmx], the compilation
+   dependencies which are automatically chosen are those which
+   maximise independent compilations, as with target "nat" above.
+
+ warn
+   To print the names of the files containing warnings.
+
+ clean
+   To delete all the files produced by the OCaml system and the
+   makefile.
+
+ mostlyclean
+   Same as [clean], except that no executable is deleted.
+
+ lines
+   To display the number of OCaml lines of the project. The first
+   column contains the number of non-empty, non-comment lines in
+   implementations (.ml) only. Number of lines with a single ";;" is
+   also printed. Requires [ocamlwc].
+
+
+MISCELLANEA TARGETS
+
+ size
+   To display the number of lines of Makefile without comments nor
+   blank lines.
+
+ dep
+   To update the compilation dependencies when maximising independent
+   compilations. For debugging.
+
+ phony
+   To print all phony targets (.PHONY). For debugging.
+
+
+TAGS
+
+Specific command-line options to be passed to an OCaml tool to process
+a given file [<mod>.mli] or [<mod>.ml] must be written in a hidden,
+metadata file whose name is [.<mod>.mli.tag] or [.<mod>.ml.tag],
+located in the source directory. The name of the tool must be written
+at the start of a line, immediately followed by a semi-colon, then the
+options. For example, if [camlp4o] is needed to compile the unit
+[<mod>.ml], then [.<mod>.ml.tag] should contain
+
+ocamlc: -pp camlp4o
+
+By default, the options for [ocamlopt] and [ocamlopt.opt] are those
+given for [ocamlc] and [ocamlc.opt], if any. The options for
+[ocamllex] and [ocamllex.opt] must be written in [.<mod>.mll.tag],
+those for [menhir] in [.<mod>.mly.tag], and those for the linker when
+building [<mod>.byte] or [<mod>.opt] should be given in [.<mod>.tag].
+
+It is also possible to specify in the tag file of an executable (used
+by the linker) the basenames of the source files containing the
+bytecodes to be linked, ordered as the linker expects them to be. The
+line must start with "objects: " and then lists the object basenames,
+separated by spaces. Doing so increases speed, and not doing so might
+lead to unexpected behaviours in case of interfering side-effects at
+link-time. Also, it is necessary in the case of a valid circular
+dependency, whereby, give two modules with interfaces and
+implementations, one implementation uses a type from the other module,
+whose implementation uses a value from the former. We recommend not to
+specify the objects during development, not to rely on side-effects
+when initialising modules, but to explicitly state the objects in the
+tag file when releasing the software, for faster and more predictable
+builds at the customer's site.
+
+
+THIRD PARTY LIBRARIES
+
+Let us imagine that you want to use Ulex, a library written by Alain
+Frisch to parse UTF-8 encoded Unicode points. It is convenient to use
+[ocamlfind] (FindLib) to install and manage that library, and also
+drive the compilers and related tools. If the makefile finds
+[ocamlfind], then it will be used to drive the OCaml compilers.
+
+Ulex relies on [camlp4] to extend the syntax of OCaml in order to
+embedded regular expressions in OCaml programs. Let us assume that a
+Ulex-based scanner is defined in the file [scan.ml]. Then, you need
+the associated tag file [.scan.ml.tag] to contain
+
+ocamldep: -syntax camlp4o
+ocamlc: -syntax camlp4o
+
+Note that the Makefile will automatically determine whether Findlib
+has installed the package [ulex], which can then be retrieved by
+[ocamlfind], and it will further silently pass to the compilers the
+additional flag "-package ulex". Similarly, the Makefile will
+automatically pass to the linker the option "-package ulex
+-linkpkg". (Note: In case you need additional options for the linker,
+put them in the tag file [.scan.tag], where Scan is the main module,
+that is, the last to be linked.)
+
+
+LINKING WITH C BINDINGS
+
+Let us assume that you want to build your executable with C
+bindings. For instance, you have a file named [foo_binding.c], which
+defines a C function whose prototype is [void foo ()]. You mean to
+bind this function to your OCaml application through a module Foo. You
+write, in [foo.mli]:
+
+val foo: unit -> unit
+
+and, in [foo.ml]:
+
+external foo: unit -> unit = "foo"
+
+The makefile will automatically detect all C files in the source
+directory and compile them in the build directory. (See the CFLAGS
+variable above.)
+
+You only need now to inform the C linker used by OCaml to include
+[foo_binding.o] by writing a tag file [.<main>.tag] like so:
+
+ocamlc: -custom -cclib foo_binding.o
+ocamlopt: -cclib foo_binding.o
+
+Now you can build and use [Foo.foo] in your OCaml program.
+
+Note: Make sure that you do not have [foo.c] and [foo.ml] in the same
+source directory, as this will break any native build. Use
+[foo_binding.c] and [foo.ml].
+
+LIMITATIONS
+
+During the first build, all source files are built (if generated from
+a specification) and parsed with [ocamldep] or [ocamldep.opt] to
+extract their compilation dependencies. This may that time if there
+are many large compilation units. Nevertheless, subsequent extractions
+will be based solely on source and tag changes or creation, so the
+cost of parsing unused files when building from a clean slate is
+likely to be amortised in the long run.
