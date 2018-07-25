@@ -704,7 +704,7 @@ byte-code target:
     Compiling eparser.ml... done (589 lines).
     Linking objects as _i686/topproc... done.
 
-    We have now:
+We have now:
 
     $ cat .ext
     Array: preproc.ml
@@ -1006,7 +1006,7 @@ the meta-dependencies and inject them as (normal) prerequisites to the
 those dependencies will trigger a new parser generation and
 compilation of the produced code.
 
-## Macro `mk_par`
+### Macro `mk_par`
 
 The macro `mk_par` is called to generate a parser from a Menhir
 *mod*`.mly` specification. Its first parameter is *mod*, and the
