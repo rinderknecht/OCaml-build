@@ -1,21 +1,21 @@
 # A GNU Makefile for OCaml applications
 
 The accompanying GNU Makefile automates the build of small
-OCaml projects with minimum user input. 
+OCaml projects with minimum user input.
 
-In the tradition of helpful makefiles, it calls a minimum number of 
-times the compilers and the related tools. It has been designed 
+In the tradition of helpful makefiles, it calls a minimum number of
+times the compilers and the related tools. It has been designed
 primarily as a development tool, not a diagnostic tool, so the build
-process is detailed in a concise and precise manner, without redundancy,
-and a great amount of efforts has been devoted to clear warning and
-error reporting, in particular the first error in a causal chain is
-detailed and the subsequent others are skipped while the compilation 
-goes as far as possible, within reasonable limits, e.g., if an interface
-fails to compile, its corresponding implementation is ignored entirely.
-Uncorrected faults, warnings and ignored source files are reported again,
-so the programmer is reminded of fixing them. Optionally, this
-makefile may also determine a default linking order for the object
-files. 
+process is detailed in a concise and precise manner, without
+redundancy, and a great amount of efforts has been devoted to clear
+warning and error reporting, in particular the first error in a causal
+chain is detailed and the subsequent others are skipped while the
+compilation goes as far as possible, within reasonable limits, e.g.,
+if an interface fails to compile, its corresponding implementation is
+ignored entirely.  Uncorrected faults, warnings and ignored source
+files are reported again, so the programmer is reminded of fixing
+them. Optionally, this makefile may also determine a default linking
+order for the object files.
 
 Some classic tools, like `ocamlfind`, `ocamllex`, `menhir` and
 `camlp4`, are recognised and automatically leveraged. Command line
@@ -28,17 +28,19 @@ readability of reporting.
 Several executables can be built in the same source directory, but,
 currently, all source files must reside in the same directory.
 
-The makefile has no interface with control version systems (except Git,
-in a commented out section), but it detects modifications, deletions and 
-creations of source files between build cycles, and it reacts appropriately 
-so there is no need to restart a build cycle from a clean slate to correct 
-an inconsistency. Note that, as usual with makefiles, this build system 
-relies only on time stamps to drive its actions.
+The makefile has no interface with control version systems (except
+Git, in a commented out section), but it detects modifications,
+deletions and creations of source files between build cycles, and it
+reacts appropriately so there is no need to restart a build cycle from
+a clean slate to correct an inconsistency. Note that, as usual with
+makefiles, this build system relies only on time stamps to drive its
+actions.
 
 ## Configuration
 
-The first action to undertake is to check the availability of the utilities 
-required to build your application. This is simply achieved by running
+The first action to undertake is to check the availability of the
+utilities required to build your application. This is simply achieved
+by running
 
     $ make config
 
@@ -46,8 +48,8 @@ Note that installing `ocamlfind` is highly recommended, so third-party
 libraries can be automatically handled by the makefile.
 
 The minimal OCaml application is made up of exactly one implementation
-(`.ml`, `.mll` or `.mly`), say `foo.ml`. In the most general case, several
-applications can be built from the same source directory.
+(`.ml`, `.mll` or `.mly`), say `foo.ml`. In the most general case,
+several applications can be built from the same source directory.
 
 Each OCaml application can be built in two flavours: bytecode or
 native code. The name of the executable will always be the name of the
@@ -79,9 +81,9 @@ following.
   of calling `ocamlc.opt` instead when available; otherwise the
   default value is "ocamlc.opt" if found, else "ocamlc". The setting
   can be checked by running
-    
+
     $ make env
-  
+
   Optionally, you may set `OCAMLC` in `Makefile.cfg`.
 
 * `OCAMLOPT`
@@ -94,7 +96,7 @@ following.
   The standard lexer generator. If `ocamllex.opt` is installed, the
   default value is "ocamllex.opt", else "ocamllex". The setting
   can be checked by running
-  
+
     $ make env
   Optionally, you may set `OCAMLLEX` in `Makefile.cfg`.
 
@@ -114,7 +116,7 @@ following.
   Additional flags to the invocation `ocamlc -c` or `ocamlc.opt -c`,
   applying to all OCaml compilation units. (None by default.) Flags
   specific to a unit *mod*`.mli` or *mod*`.ml` must be set in the
-  corresponding tag file `.`*mod*`.mli.tag` or `.`*mod*`.ml.tag`. 
+  corresponding tag file `.`*mod*`.mli.tag` or `.`*mod*`.ml.tag`.
   See section TAGS below.
 
 * `CFLAGS`
@@ -149,12 +151,12 @@ following.
 
 The object codes, the executables and metadata are generated in a
 subdirectory of the source directory. The name of that directory can
-be set in `Makefile.cfg` (variable `OBJDIR`), or automatically determined
-by the makefile, in which case it consists of an underscore followed
-by the result of the `arch` shell command, e.g., `_i686` or `_x86_64`. 
-This naming convention enables multi-architecture builds. For
-instance, if the programmer wants the build directory to be `_build`,
-they should set it in `Makefile.cfg` as follows:
+be set in `Makefile.cfg` (variable `OBJDIR`), or automatically
+determined by the makefile, in which case it consists of an underscore
+followed by the result of the `arch` shell command, e.g., `_i686` or
+`_x86_64`.  This naming convention enables multi-architecture
+builds. For instance, if the programmer wants the build directory to
+be `_build`, they should set it in `Makefile.cfg` as follows:
 
     OBJDIR := _build
 
@@ -189,10 +191,10 @@ invocation of GNU Make.
    constraints, see target `nat` and section TAGS.) To benefit fully of this
    build, typically for a release, you should make a clean slate with
    `make clean` and then `make opt`. Note that if you update a
-   specific object, e.g., 
- 
+   specific object, e.g.,
+
         $ make parser.cmx
-    
+
    the compilation dependencies which are automatically chosen are those which
    maximise independent compilations, as with target `nat`.
 
@@ -234,20 +236,19 @@ hidden metadata file whose name is `.`*mod*`.mli.tag` or
 `.`*mod*`.ml.tag`. The name of the tool must be written at the start
 of a line, immediately followed by a semicolon, then the
 options. Currently, `ocamldep`, `ocamlc`, `ocamlopt`, `ocamllex` and
-Menhir are recognised; for example, if `camlp4o` is needed to compile 
+Menhir are recognised; for example, if `camlp4o` is needed to compile
 the unit *mod*.`ml`, then `.`*mod*`.ml.tag` should contain the lines
 
     ocamldep: -pp camlp4o
     ocamlc:   -pp camlp4o -w -26
     ocamlopt: -pp camlp4o
 
-(If `ocamlc.opt` and `ocamlopt.opt` are actually the tools being used, 
-the expected names in the tag file are nevertheless `ocamlc` and `ocamlopt`,
-because they accept the same options.) In the absence of a line about 
-`ocamlopt`, the options for `ocamlc`,
-if any, are used instead, therefore, in order to ensure that no
-options are passed to `ocamlopt` when options are passed to `ocamlc`,
-simply write
+(If `ocamlc.opt` and `ocamlopt.opt` are actually the tools being used,
+the expected names in the tag file are nevertheless `ocamlc` and
+`ocamlopt`, because they accept the same options.) In the absence of a
+line about `ocamlopt`, the options for `ocamlc`, if any, are used
+instead, therefore, in order to ensure that no options are passed to
+`ocamlopt` when options are passed to `ocamlc`, simply write
 
     ocamlopt:
 
@@ -273,18 +274,18 @@ bytecodes to be linked, ordered as the linker expects them to be. The
 line must start with
 
     objects:
-    
-and then lists the object basenames, separated by spaces. Doing so increases 
-speed, and not doing so might
-lead to unexpected behaviours in case of interfering side-effects at
-link-time. Also, it is necessary in the case of a valid circular
-dependency, whereby, give two modules with interfaces and
-implementations, one implementation uses a type from the other module,
-whose implementation uses a value from the former. We recommend not to
-specify the objects during development, not to rely on side-effects
-when initialising modules, but to explicitly state the objects in the
-tag file when releasing the software, for faster and more predictable
-builds at the customer's site.
+
+and then lists the object basenames, separated by spaces. Doing so
+increases speed, and not doing so might lead to unexpected behaviours
+in case of interfering side-effects at link-time. Also, it is
+necessary in the case of a valid circular dependency, whereby, give
+two modules with interfaces and implementations, one implementation
+uses a type from the other module, whose implementation uses a value
+from the former. We recommend not to specify the objects during
+development, not to rely on side-effects when initialising modules,
+but to explicitly state the objects in the tag file when releasing the
+software, for faster and more predictable builds at the customer's
+site.
 
 ## Third party libraries
 
@@ -414,7 +415,7 @@ likely to be amortised in the long run.
 Source files should reside in the same directory where the makefile is
 located.
 
-Before attempting the first build, it is advised to run 
+Before attempting the first build, it is advised to run
 
     $ make conf
     Found /opt/local/bin/ocamlc
@@ -433,7 +434,6 @@ Before attempting the first build, it is advised to run
     Found /opt/local/bin/grep
     Found /opt/local/libexec/gnubin/sed
     Found /usr/bin/arch
-    $ 
 
 to check the availability of the main tools required, in particular,
 the presence of `ocamldep.opt`, `ocamlc.opt`, `ocamlopt.opt` or
