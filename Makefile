@@ -1126,6 +1126,7 @@ case "$2" in
     ret_code=$$?;;
   \.cmx)
     printf " to native code... "
+    flags=""
     if test -e $$tag; then
       if grep "^ocamlopt:" $$tag > /dev/null 2>&1
       then flags="$$(sed -n 's/^ocamlopt: \(.*\)/\1/p' $$tag)"
@@ -1220,6 +1221,9 @@ if test ! -e .$$unit.syn; then
         cd ${SRCDIR}
         flags="$$(sed -n 's/^ocamlc: \(.*\)/\1/p' $$tag 2>/dev/null)"
         camlcmd="${OCAMLFIND} ${OCAMLC} -I ${OBJDIR} ${BFLAGS} $$flags $$includes $$packages"
+        if test "${TRACE}" = "yes"; then
+          echo "camlcmd=\"${notdir ${OCAMLFIND}} ${notdir ${OCAMLC}} -I ${OBJDIR} ${BFLAGS} $$flags $$includes $$packages\"" >> ${OBJDIR}/build.sh
+        fi
         ${call mk_par,$*,--infer --ocamlc="$$camlcmd",,infer}
         cd ${OBJDIR}
         if test ! -e $$sem; then
