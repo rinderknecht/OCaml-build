@@ -1434,7 +1434,7 @@ fi
 ${MAKE} -f ${SRCDIR}/${THIS} ${IMPL:%=-W %.ml} \
         ${BIN}.cmx LOG_OBJ:=yes 2> $$circ
 if test "$$?" = "0"; then echo "done."
-else echo "FAILED."; exit 1; fi
+else echo "FAILED."; rm -f .*.dis; exit 1; fi
 
 if test -s $$circ; then
   sed ${I} -e "s/.*: //g" \
@@ -1456,7 +1456,7 @@ ${if ${DEBUG},echo "Entering prelink to make $@."}
 # cp -f $$lnk $$lnk.old 2>/dev/null
 
 ${MAKE} -f ${SRCDIR}/${THIS} NO_DEP:=yes $$lnk
-if test "$$?" != "0"; then exit 1; fi
+if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 
 if test -s .${BIN}.ign; then
   sed "s/^\(.*\)\.ml[i]\?$$/\1/" .${BIN}.ign \
@@ -1467,11 +1467,11 @@ if grep -w ${BIN} $$lnk > /dev/null 2>&1; then
 #  if ! diff -q $$lnk $$lnk.old > /dev/null 2>&1; then
     ${MAKE} -f ${SRCDIR}/${THIS} $1 NO_DEP:=yes \
             OBJ:="$$(echo $$(cat $$lnk))" $@
-    if test "$$?" != "0"; then exit 1; fi
+    if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 #  fi
 else ${call emphasise,Error: Cannot link objects to build $@:}
      ${call emphasise,Main module ${BIN} is faulty.}
-     exit 1
+     rm -f .*.dis; exit 1
 fi
 endef
 
@@ -1480,7 +1480,7 @@ ${call display,$$err}
 if test -s .${BIN}.circ; then ${call display,.${BIN}.circ}; fi
 if test "${origin OBJ}" != "command line"; then
   echo "> Check OBJ in Makefile.cfg (order)."; fi
-exit 1
+rm -f .*.dis; exit 1
 endef
 
 define link
@@ -1499,7 +1499,7 @@ done
 if test -n "$$skip"; then
   ${call emphasise,Error: Cannot link objects to build $@:}
   ${call emphasise,Module $$skip is faulty.}
-  exit 1
+  rm -f .*.dis; exit 1
 elif test -e $$err -a -z "$$updates" -a $$tag -ot $$err; then
   ${call link_err}
 else
@@ -1519,7 +1519,7 @@ else
   if test -z "$$objects" -o "$$skip" = "yes"
   then printf "Linking objects as $@... "
        ${call failed,: Cannot link objects to build $@.}
-       exit 1
+       rm -f .*.dis; exit 1
   else
     if test -n "${OCAMLFIND}"; then
       all_pack=$$(echo $$objects \
@@ -1594,13 +1594,13 @@ ${BIN}.byte: FORCE
 > if test -e .${BIN}.byte -o ! -e .${BIN}.opt; then \
     flags="MAKEFLAGS=-Rrsj -Oline"; fi
 > ${MAKE} -f ${SRCDIR}/${THIS} $$flags NO_DEP:=yes ${BIN}.cmo; \
-  if test "$$?" != "0"; then exit 1; fi
+  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 > ${call prelink,$$flags}
 > rm -f .${BIN}.opt
 > touch .${BIN}.byte
 > if test -z "${SESSION}"; then \
     ${MAKE} -f ${SRCDIR}/${THIS} close_session NO_DEP:=yes; \
-    if test "$$?" != "0"; then exit 1; \
+    if test "$$?" != "0"; then rm -f .*.dis; exit 1; \
     elif test "${DEBUG}" != "yes"; then rm -f .*.old; fi; fi
 else
 ${BIN}.byte: ${OBJ:%=%.cmo} ${C:%.c=%.o} ${TAG} .del
@@ -1615,13 +1615,13 @@ ${BIN}.opt: FORCE
 > if test -e .${BIN}.opt -o ! -e .${BIN}.byte; then \
     flags="MAKEFLAGS=-Rrsj -Oline"; fi
 > ${MAKE} -f ${SRCDIR}/${THIS} $$flags NO_DEP:=yes ${BIN}.cmx; \
-  if test "$$?" != "0"; then exit 1; fi
+  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 > ${call prelink,$$flags}
 > rm -f .${BIN}.byte
 > touch .${BIN}.opt
 > if test -z "${SESSION}"; then \
     ${MAKE} -f ${SRCDIR}/${THIS} close_session NO_DEP:=yes; \
-    if test "$$?" != "0"; then exit 1; \
+    if test "$$?" != "0"; then rm -f .*.dis; exit 1; \
     elif test "${DEBUG}" != "yes"; then rm -f .*.old; fi; fi
 else
 ${BIN}.opt: ${OBJ:%=%.cmx} ${C:%.c=%.o} ${TAG} .del
@@ -1778,12 +1778,12 @@ export BYTE := ${addsuffix .byte,${ROOTS}}
 
 all byte: sync
 > ${MAKE} -f ${THIS} ${BYTE} SESSION:=yes; \
-  if test "$$?" != "0"; then exit 1; fi
+  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 > ${MAKE} -f ${THIS} close_session NO_DEP:=yes
 
 opt nat: sync
 > ${MAKE} -f ${THIS} ${OPT} SESSION:=yes; \
-  if test "$$?" != "0"; then exit 1; fi
+  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi
 > ${MAKE} -f ${THIS} close_session NO_DEP:=yes
 
 # Checking that there are no <foo>.mll and <foo>.mly
@@ -1868,7 +1868,7 @@ if test -d "${OBJDIR}"; then \
     echo "Changing directory to ${notdir ${OBJDIR}}."; fi; \
   ${MAKE} -f ${CURDIR}/${THIS} --no-print-directory \
           -C ${OBJDIR} SRCDIR=${CURDIR} $2 $1; \
-  if test "$$?" != "0"; then exit 1; fi; fi
+  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi; fi
 endef
 
 # TEMPORARY
