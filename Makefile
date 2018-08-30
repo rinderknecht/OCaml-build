@@ -1320,16 +1320,13 @@ ${IMPL_ONLY:%=%.cmo}: %.cmo: %.cmi
 
 # Implementations (native code)
 
-%.cmx: %.ml
+${MOD:%=%.cmx}: %.cmx: %.ml
 > ${call comp_unit}
 
-# ${MOD:%=%.cmx}: %.cmx: %.ml
-# > ${call comp_unit}
-
-# ${IMPL_ONLY:%=%.cmx}: %.cmx: %.cmi
-# > if test -e $@ -a $< -nt $@ \
-#      -o ! -e $@ -a ! -e .$*.mli.ign; \
-#   then ${call comp_stand,.cmx}; fi
+${IMPL_ONLY:%=%.cmx}: %.cmx: %.cmi
+> if test -e $@ -a $< -nt $@ \
+     -o ! -e $@ -a ! -e .$*.mli.ign; \
+  then ${call comp_stand,.cmx}; fi
 
 %.cmx: ;
 
