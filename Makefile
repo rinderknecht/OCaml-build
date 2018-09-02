@@ -250,7 +250,7 @@ else
       if test -n "$$extra"; then
         echo "$$extra"
         sed ${I} '/^Extra /d' $$out; fi
-      mv -f $$out $$wrn
+      if test -s "$$out"; then mv -f $$out $$wrn; fi
     else
       printf ".\n"
       rm -f $$out; fi
