@@ -1868,7 +1868,7 @@ if test -d "${OBJDIR}"; then \
     echo "Changing directory to ${notdir ${OBJDIR}}."; fi; \
   ${MAKE} -f ${CURDIR}/${THIS} --no-print-directory \
           -C ${OBJDIR} SRCDIR=${CURDIR} $2 $1; \
-  if test "$$?" != "0"; then rm -f .*.dis; exit 1; fi; fi
+  if test "$$?" != "0"; then rm -f ${OBJDIR}/.*.dis; exit 1; fi; fi
 endef
 
 # TEMPORARY
