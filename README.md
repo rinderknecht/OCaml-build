@@ -296,7 +296,7 @@ drive the compilers and related tools. If the makefile finds
 `ocamlfind`, then it will be used to drive the OCaml compilers.
 
 Ulex relies on `camlp4` to extend the syntax of OCaml in order to
-embedded regular expressions in OCaml programs. Let us assume that a
+embed regular expressions in OCaml programs. Let us assume that a
 Ulex-based scanner is defined in the file `scan.ml`. Then, you need
 the associated tag file `.scan.ml.tag` to contain
 
@@ -321,11 +321,11 @@ defines a C function whose prototype is `void foo ()`. You mean to
 bind this function to your OCaml application through a module `Foo`. You
 write, in `foo.mli`:
 
-    val foo: unit -> unit
+    val foo : unit -> unit
 
 and, in `foo.ml`:
 
-    external foo: unit -> unit = "foo"
+    external foo : unit -> unit = "foo"
 
 The makefile will automatically detect all C files in the source
 directory and compile them in the build directory. (See the `CFLAGS`
@@ -440,8 +440,7 @@ the presence of `ocamldep.opt`, `ocamlc.opt`, `ocamlopt.opt` or
 `ocamllex.opt` may be leveraged by setting appropriate variables in
 the configuration file `Makefile.cfg`. In the following, we will write
 "ocamllex" to denote either the executable `ocamllex` or
-`ocamllex.opt`, and similarly for =
-ocamlc, ocamldep etc.
+`ocamllex.opt`, and similarly for "ocamlc", "ocamldep" etc.
 
 Let us assume that there is at least a main module, either of the form
 *main*`.ml`, *main*`.mll` (lexer) or *main*`.mly` (parser). A build
