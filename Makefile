@@ -1906,7 +1906,7 @@ cmi: dep FORCE
 
 CMD := "ocamlc ocamlc.opt ocamlopt ocamlopt.opt ocamldep \
         ocamldep.opt ocamllex ocamllex.opt menhir ocamlfind \
-        ocamlobjinfo ocamlwc camlp4 grep sed arch"
+        ocamlobjinfo ocamlwc camlp4 camlp5 grep sed arch"
 
 define chk_cfg
 IFS=':'
