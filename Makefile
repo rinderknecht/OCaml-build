@@ -246,6 +246,9 @@ else
       note=$$(grep '^Note' $$out)
       if test -n "$$note"; then
         echo "$$note"; fi
+      conflicts=$$(grep 'shift/reduce' $$out)
+      if test -n "$$conflicts"; then
+        printf "\033[31m$$conflicts\033[0m\n"; fi
       extra=$$(grep '^Extra' $$out)
       if test -n "$$extra"; then
         echo "$$extra"
@@ -2155,9 +2158,8 @@ else
   rm -f $*_msg.err; fi
 endef
 
-# TEMPORARY: Because of haechi 32-bit architecture
 ${TABLED_MLY:%.mly=%_msg.ml}: %_msg.ml: %.msg
-#> ${call mk_msg_ml,$*}
+> ${call mk_msg_ml,$*}
 
 # Producing erroneous sentences from Menhir's error messages
 
