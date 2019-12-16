@@ -2164,7 +2164,7 @@ ${TABLED_MLY:%.mly=%_msg.ml}: %_msg.ml: %.msg
 # Producing erroneous sentences from Menhir's error messages
 
 define mk_raw
-raw=${OBJDIR}/.$1.msg.raw
+raw=${OBJDIR}/$1.msg.raw
 printf "Making $1.msg.raw from $1.msg... "
 flags="$$(echo $$(cat .$1.mly.tag 2>/dev/null))"
 ${strip ${MENHIR} --echo-errors $1.msg ${YFLAGS} \
@@ -2186,9 +2186,9 @@ define mk_conc
 printf "Unlexing the erroneous sentences... "
 for dir in ${TABLED_DIRS}; do
   msg=$$(basename $$dir).msg
-  states=${OBJDIR}/.$$msg.states
-  map=${OBJDIR}/.$$msg.map
-  raw=${OBJDIR}/.$$msg.raw
+  states=${OBJDIR}/$$msg.states
+  map=${OBJDIR}/$$msg.map
+  raw=${OBJDIR}/$$msg.raw
   sed -n "s/.* state\: \([0-9]\+\)./\1/p" $$msg > $$states
   paste -d ':' $$states $$raw > $$map
   rm -f $$dir/*.${EXT}
