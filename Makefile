@@ -1,5 +1,5 @@
 # GNU Makefile (>= 4.0) for building OCaml applications
-# (c) 2012-2018 Christian Rinderknecht
+# (c) 2012-2019 Christian Rinderknecht
 # rinderknecht@free.fr
 
 # ====================================================================
@@ -2066,7 +2066,7 @@ if test -e $$msg; then mv -f $$msg $$msg.old; echo "Saved $$msg."; fi
 
 printf "Making new $$msg from $$mly... "
 flags="$$(echo $$(cat .$$mly.tag 2>/dev/null))"
-${strip ${MENHIR} --list-errors ${YFLAGS} $$flags $$mly > $$msg 2>$$out}
+${strip ${MENHIR} --list-errors ${YFLAGS} $$flags $$mly > $$msg 2> $$out}
 
 if test "$$?" = "0"; then
   sentences=$$(grep "YOUR SYNTAX ERROR MESSAGE HERE" $$msg | wc -l)
@@ -2082,7 +2082,7 @@ if test "$$?" = "0"; then
     printf "Checking inclusion of mappings (new in old)... "
     ${strip ${MENHIR} --compare-errors $$msg \
                       --compare-errors $$msg.old \
-                      ${YFLAGS} $$flags $$mly 2>$$out}
+                      ${YFLAGS} $$flags $$mly 2> $$out}
     if test "$$?" = "0"; then
       if test -s $$out; then
         printf "done:\n"
@@ -2143,7 +2143,7 @@ else
   flags="$$(echo $$(cat .$*.mly.tag 2>/dev/null))"
   printf "Making $*_msg.ml from $*.msg... "
   ${strip ${MENHIR} --compile-errors $*.msg ${YFLAGS} \
-                    $$flags $*.mly > $*_msg.ml 2>$*_msg.err}
+                    $$flags $*.mly > $*_msg.ml 2> $*_msg.err}
   if test "$$?" = "0"
   then printf "done.\n"
        rm -f ${OBJDIR}/.$*_msg.mli.ign
@@ -2242,15 +2242,14 @@ size:
 > sed -e "/^[[:space:]]*#/d" -e "/^[[:space:]]*$$/d" ${THIS} | wc -l
 
 # ====================================================================
-# Cleaning the slate (Add your own [clean:] rules in [Makefile.cfg].)
+# Cleaning the slate (Add your own [clean::] rules in [Makefile.cfg].)
 
-# TEMPORARY: Because of haechi's 32-bit architecture
 mostlyclean:
-> rm -f ${LML} ${YMLI} ${YML} ${MSG_NEW} ${RAW} #${MSG_ML}
+> rm -f ${LML} ${YMLI} ${YML} ${MSG_NEW} ${RAW} ${MSG_ML}
 > rm -f *.output *.automaton *.conflicts
 > ${call goto_build,$@}
 
-clean: mostlyclean
+clean:: mostlyclean
 > rm -fr ${OBJDIR}
 
 clean_obj clean_bin clean_stubs clean_dep clean_displays close_session:
