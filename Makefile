@@ -1,9 +1,12 @@
 # GNU Makefile (>= 4.0) for building OCaml applications
-# (c) 2012-2019 Christian Rinderknecht
+# (c) 2012-2020 Christian Rinderknecht
 # rinderknecht@free.fr
 
 # ====================================================================
 # TO DO
+
+# Bug: From scratch, [make] then error because Version.ml is missing,
+# then [make sync], then [make] fails (it should not).
 
 # Add a catch-all rule
 # Inform about useless modules (neither compiled nor linked)
@@ -175,6 +178,7 @@ endif
 define mk_par
 ${if ${DEBUG},echo "Entering mk_par ($1.mly)."}
 mly=$1.mly
+conflicts=$1.conflicts
 tag=.$$mly.tag
 mli=$1.mli
 ml=$1.ml
@@ -256,7 +260,9 @@ else
       if test -s "$$out"; then mv -f $$out $$wrn; fi
     else
       printf ".\n"
-      rm -f $$out; fi
+      rm -f $$out;
+      if test -e $$conflicts; then rm -f $$conflicts; fi
+    fi
   else
     ${call failed,:}
     rm -f $$obj
@@ -961,8 +967,8 @@ else
   flags="$$(echo $$(cat $$tag 2>/dev/null))"
   cd ${SRCDIR}
   ${strip ${MENHIR} --raw-depend \
-                         --ocamldep="${OCAMLDEP} ${DFLAGS}" \
-                         ${YFLAGS} $$flags $1.mly > ${OBJDIR}/$$out 2>&1}
+                    --ocamldep="${OCAMLDEP} ${DFLAGS}" \
+                    ${YFLAGS} $$flags $1.mly > ${OBJDIR}/$$out 2>&1}
   if test "$$?" = "0"; then
     if test "${DEBUG}" = "yes"; then \
       printf "\nChanging directory to ${notdir ${OBJDIR}}.\n"; fi
@@ -2059,6 +2065,7 @@ ${YML}: %.ml: %.mli ;
 define mk_msg
 mly=$1.mly
 msg=$1.msg
+conflicts=$1.conflicts
 out=${OBJDIR}/.$$mly.out
 err=${OBJDIR}/.$$msg.err
 
@@ -2069,6 +2076,7 @@ flags="$$(echo $$(cat .$$mly.tag 2>/dev/null))"
 ${strip ${MENHIR} --list-errors ${YFLAGS} $$flags $$mly > $$msg 2> $$out}
 
 if test "$$?" = "0"; then
+  if test -e $$conflicts; then rm -f $$conflicts; fi
   sentences=$$(grep "YOUR SYNTAX ERROR MESSAGE HERE" $$msg | wc -l)
   if test -z "$$sentences"; then printf "done.\n"
   else
@@ -2083,6 +2091,7 @@ if test "$$?" = "0"; then
     ${strip ${MENHIR} --compare-errors $$msg \
                       --compare-errors $$msg.old \
                       ${YFLAGS} $$flags $$mly 2> $$out}
+
     if test "$$?" = "0"; then
       if test -s $$out; then
         printf "done:\n"
@@ -2098,6 +2107,7 @@ if test "$$?" = "0"; then
         ${call emphasise,Warning: The LR items may have changed.}
         ${call emphasise,> Check your error messages again.}
         rm -f $$err
+        if test -e $$conflicts; then rm -f $$conflicts; fi
       else ${call failed,"."}
            touch $$err
            mv -f $$msg.old $$msg
@@ -2147,6 +2157,7 @@ else
   if test "$$?" = "0"
   then printf "done.\n"
        rm -f ${OBJDIR}/.$*_msg.mli.ign
+       if test -e $*.conflicts; then rm -f $*.conflicts; fi
   else ${call failed,:}
        ${call display,$*_msg.err}
        if test "${DEBUG}" = "yes"; then
