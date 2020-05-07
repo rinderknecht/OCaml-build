@@ -243,6 +243,10 @@ else
       warning=$$(grep '^Warning' $$out)
       if test -n "$$warning"; then
         echo "$$warning"; fi
+      pager=$$(grep -w pager $$out)
+      if test -n "$$pager"; then
+        echo "$$pager"
+        sed ${I} '/\<pager\>/d' $$out; fi
       built=$$(grep '^Built' $$out)
       if test -n "$$built"; then
         echo "$$built"
@@ -1883,7 +1887,7 @@ endef
 
 # TEMPORARY
 .PHONY: src
-src: ${LML} ${YMLI} ${YML} #${MSG_ML}
+src: ${LML} ${YMLI} ${YML} ${MSG_ML}
 
 %.byte: ${if ${SESSION},,sync} src FORCE
 > ${call goto_build,$@,BIN=$*}
@@ -2103,9 +2107,13 @@ if test "$$?" = "0"; then
                         ${YFLAGS} $$flags $$mly \
                         > $$msg 2> $$err}
       if test "$$?" = "0"; then
-        printf "done:\n"
-        ${call emphasise,Warning: The LR items may have changed.}
-        ${call emphasise,> Check your error messages again.}
+        if $$(diff $$msg $$msg.old 2>&1 > /dev/null); then
+          echo "done."
+        else
+          printf "done:\n"
+          ${call emphasise,Warning: The LR items may have changed.}
+          ${call emphasise,> Check your error messages again.}
+        fi
         rm -f $$err
         if test -e $$conflicts; then rm -f $$conflicts; fi
       else ${call failed,"."}
@@ -2159,7 +2167,7 @@ else
        rm -f ${OBJDIR}/.$*_msg.mli.ign
        if test -e $*.conflicts; then rm -f $*.conflicts; fi
   else ${call failed,:}
-       ${call display,$*_msg.err}
+       ${call display,.$*_msg.err}
        if test "${DEBUG}" = "yes"; then
          echo "Ignoring $*_msg.mli."; fi
        touch $*_msg.ml ${OBJDIR}/.$*_msg.mli.ign
