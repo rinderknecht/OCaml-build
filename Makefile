@@ -2152,6 +2152,7 @@ msg:
 
 define mk_msg_ml
 ${if ${DEBUG},echo "Entering mk_msg_ml ($@)."}
+msg_err=${OBJDIR}/.$*_msg.err
 if test -e ${OBJDIR}/.$*.ml.ign \
      -o -e ${OBJDIR}/.$*.msg.err; then
   echo "Ignoring $*_msg.ml."
@@ -2161,20 +2162,20 @@ else
   flags="$$(echo $$(cat .$*.mly.tag 2>/dev/null))"
   printf "Making $*_msg.ml from $*.msg... "
   ${strip ${MENHIR} --compile-errors $*.msg ${YFLAGS} \
-                    $$flags $*.mly > $*_msg.ml 2> $*_msg.err}
+                    $$flags $*.mly > $*_msg.ml 2> $$msg_err}
   if test "$$?" = "0"
   then printf "done.\n"
        rm -f ${OBJDIR}/.$*_msg.mli.ign
        if test -e $*.conflicts; then rm -f $*.conflicts; fi
   else ${call failed,:}
-       ${call display,.$*_msg.err}
+       ${call display,$$msg_err}
        if test "${DEBUG}" = "yes"; then
          echo "Ignoring $*_msg.mli."; fi
        touch $*_msg.ml ${OBJDIR}/.$*_msg.mli.ign
        rm -f ${OBJDIR}/$*_msg.cmi \
              ${OBJDIR}/$*_msg.cmo \
              ${OBJDIR}/$*_msg.cmx; fi
-  rm -f $*_msg.err; fi
+  rm -f $$msg_err; fi
 endef
 
 ${TABLED_MLY:%.mly=%_msg.ml}: %_msg.ml: %.msg
