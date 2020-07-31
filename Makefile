@@ -247,10 +247,12 @@ else
       if test -n "$$pager"; then
         echo "$$pager"
         sed ${I} '/\<pager\>/d' $$out; fi
+
       built=$$(grep '^Built' $$out)
       if test -n "$$built"; then
         echo "$$built"
         sed ${I} '/^Built /d' $$out; fi
+
       note=$$(grep '^Note' $$out)
       if test -n "$$note"; then
         echo "$$note"; fi
@@ -261,6 +263,10 @@ else
       if test -n "$$extra"; then
         echo "$$extra"
         sed ${I} '/^Extra /d' $$out; fi
+     priority=$$(grep '^Priority' $$out)
+     if test -n "$$priority"; then
+       echo "$$priority"
+       sed ${I} '/^Priority /d' $$out; fi
       if test -s "$$out"; then mv -f $$out $$wrn; fi
     else
       printf ".\n"
