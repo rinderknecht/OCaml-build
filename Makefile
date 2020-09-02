@@ -386,7 +386,7 @@ printf "#!/bin/sh\nset -x\n" > build.sh
 # Creating the OCaml module containing the current commit number as a
 # version number
 
-hash=$$(git describe --always --dirty --abbrev=0)
+hash=$$(git describe --always --dirty)
 printf "let version = \"%s\"\n" $$hash > ${SRCDIR}/Version2.ml
 if test ! -e ${SRCDIR}/Version.ml \
 || (! diff -q ${SRCDIR}/Version2.ml ${SRCDIR}/Version.ml >/dev/null); \
