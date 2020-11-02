@@ -355,8 +355,6 @@ sinclude ${SRCDIR}/Makefile.cfg
 # The parser generator is Menhir
 
 MENHIR ?= menhir
-MENHIRLIB := ${if ${shell which ${MENHIR}}, \
-                 ${shell ${MENHIR} --suggest-menhirLib},}
 
 # ====================================================================
 # Restoring consistency after deletions
@@ -835,8 +833,7 @@ for lib in $$missing; do
     opium) \
       packs="$$packs opium.unix";;
     menhirLib) \
-      echo $$ext >> .$1.lib
-      echo ${MENHIRLIB} >> .$1.incl;;
+      packs="$$packs menhirLib";;
     *) intf=$$(find ${LIB_PATH} -name $$ext.cmi -or -name $$lib.cmi)
        if test -n "$$intf"; then
          intf_path=$$(dirname $$intf)
@@ -1878,7 +1875,6 @@ sinclude Makefile.cfg
 # The parser generator is Menhir
 
 MENHIR ?= menhir
-MENHIRLIB := ${shell ${MENHIR} --suggest-menhirLib}
 
 # Jumping to the build directory and updating recursively
 
