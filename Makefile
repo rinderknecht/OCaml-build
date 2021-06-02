@@ -221,7 +221,7 @@ if test "$$up" = "no"; then
   rm -f $$obj
 else
   if test "$4" != "infer"; then rm -f $$del; fi
-  lines="$$(wc -l $$mly | sed 's/ *\([0-9]\+\) .*/\1/g')"
+  lines="$$(wc -l $$mly | sed -e 's/ *\([0-9]\+\) .*/\1/g')"
   printf "Making $$ml(i) from $$mly"
   flags='$2'" $$(echo $$(cat $$tag 2>/dev/null))"
   ${call line_count,$$lines}
@@ -2091,6 +2091,7 @@ if test "$$?" = "0"; then
     printf "There are %s error sentences, %s with spurious reductions.\n" \
            $$sentences $$spurious
   fi
+  sed ${I} 's/ *$$//' $$msg
   if test -s $$out; then cat $$out; fi
   if test -f $$msg.old; then
     printf "Checking inclusion of mappings (new in old)... "
@@ -2108,6 +2109,7 @@ if test "$$?" = "0"; then
       ${strip ${MENHIR} --update-errors $$msg.old \
                         ${YFLAGS} $$flags $$mly \
                         > $$msg 2> $$err}
+      sed ${I} 's/ *$$//' $$msg
       if test "$$?" = "0"; then
         if $$(diff $$msg $$msg.old 2>&1 > /dev/null); then
           echo "done."
