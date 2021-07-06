@@ -835,6 +835,10 @@ for lib in $$missing; do
     menhirLib) \
       packs="$$packs menhirLib";;
     *) intf=$$(find ${LIB_PATH} -name $$ext.cmi -or -name $$lib.cmi)
+       matches=$$(echo "$$intf" | wc -l)
+       if test "$$matches" -gt "1"; then
+         printf "Error: At least two libraries contain the same .cmi:\n$$intf\n"
+         exit 1; fi
        if test -n "$$intf"; then
          intf_path=$$(dirname $$intf)
          intf_name=$$(basename $$intf .cmi)
