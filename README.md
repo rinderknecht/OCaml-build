@@ -278,7 +278,7 @@ line must start with
 and then lists the object basenames, separated by spaces. Doing so
 increases speed, and not doing so might lead to unexpected behaviours
 in case of interfering side-effects at link-time. Also, it is
-necessary in the case of a valid circular dependency, whereby, give
+necessary in the case of a valid circular dependency, whereby, given
 two modules with interfaces and implementations, one implementation
 uses a type from the other module, whose implementation uses a value
 from the former. We recommend not to specify the objects during
