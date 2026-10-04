@@ -409,19 +409,19 @@ fi
 
 # Collecting objects from standalone modules
 
-all_cmi=$$(ls *.cmi 2>/dev/null | xargs -n1 -I/ basename / .cmi)
+all_cmi=$$(ls *.cmi 2>/dev/null | xargs -I/ basename / .cmi)
 for a_cmi in $$all_cmi; do
   if echo ${IMPL_ONLY} | grep -w $$a_cmi > /dev/null 2>&1; then
     cmi="$$cmi $$a_cmi"; fi
 done
 
-all_cmo=$$(ls *.cmo 2>/dev/null | xargs -n1 -I/ basename / .cmo)
+all_cmo=$$(ls *.cmo 2>/dev/null | xargs -I/ basename / .cmo)
 for a_cmo in $$all_cmo; do
   if echo ${IMPL_ONLY} | grep -w $$a_cmo > /dev/null 2>&1; then
     cmo="$$cmo $$a_cmo"; fi
 done
 
-all_cmx=$$(ls *.cmx 2>/dev/null | xargs -n1 -I/ basename / .cmx)
+all_cmx=$$(ls *.cmx 2>/dev/null | xargs -I/ basename / .cmx)
 for a_cmx in $$all_cmx; do
   if echo ${IMPL_ONLY} | grep -w $$a_cmx > /dev/null 2>&1; then
     cmx="$$cmx $$a_cmx"; fi
